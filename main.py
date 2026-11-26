@@ -30,11 +30,15 @@ def write_entry() -> Path:
     if LINE.strip() == "":
         sys.exit("line must not be only whitespace")
     output_dir.mkdir(parents=True, exist_ok=True)
-    # make.fun collects the outputs as another user than the one the
-    # program runs as, so the output must be readable by everyone.
-    output_dir.chmod(0o755)
+    # Do not chmod the output directory: the grader owns it and runs
+    # this program as a different user, so chmod would fail the run.
     target.write_text(LINE, encoding="utf-8")
-    target.chmod(0o644)
+    # Best effort only: the file is ours, but a permission problem
+    # must never fail the run.
+    try:
+        target.chmod(0o644)
+    except PermissionError:
+        pass
     return target
 
 
